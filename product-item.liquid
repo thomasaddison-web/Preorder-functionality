@@ -1,0 +1,15 @@
+<script class="ProductItem-grid-script" type="application/json">
+  {
+    "variants": [
+      {%- for variant in product.variants -%}
+        {
+          "id" : {{ variant.id | json }},
+          "incoming" : {{ variant.incoming | json }},
+          "upincomingdate" : {{ variant.next_incoming_date | json }},
+          "inventory": {{ variant.inventory_quantity | json }},
+          "available": {{ variant.available | json }}
+        }{% unless forloop.last %},{% endunless %}
+      {%- endfor -%}
+    ]
+  }
+</script>
