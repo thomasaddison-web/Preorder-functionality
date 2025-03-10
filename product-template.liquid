@@ -1,0 +1,44 @@
+<script>
+  // Store inventory quantities in JS because they're no longer
+  // available directly in JS when a variant changes.
+  // Have an object that holds all potential products so it works
+  // with quick view or with multiple featured products.
+  window.inventories = window.inventories || {};
+  window.sellingStatus = window.sellingStatus || {};
+  window.incomingvariants = window.incomingvariants || {};
+  var inv_qty = {};
+  {% for variant in product.variants %}
+      window.inventories[{{variant.id}}] = {{ variant.inventory_quantity | default: 0 }};
+      window.sellingStatus[{{variant.id}}] = {{ variant.inventory_policy | json }};
+      window.incomingvariants[{{variant.id}}] = {
+        incoming: {{ variant.incoming }},
+        date: {{ variant.next_incoming_date | date: "%b %d, %Y" | prepend: 'Starts shipping in ' | json }}
+      }
+  {% endfor %}
+</script>
+
+
+<button type="submit" data-use-primary-button="{% if use_primary_button %}true{% else %}false{% endif %}" class="ProductForm__AddToCart Button {% if product.selected_or_first_available_variant.available and use_primary_button %}Button--primary{% else %}Button--secondary{% endif %} Button--full" {% if product.selected_or_first_available_variant.available %}data-action="add-to-cart"{% else %}disabled="disabled"{% endif %}>
+  {%- if product.selected_or_first_available_variant.available -%}
+    <span class="ProductForm__AddToCart-txt">
+      {% if current_variant.inventory_management == "shopify" %}
+        {% if current_variant.inventory_quantity <= 0 %}
+        Preorder
+        {% else %}
+          add to bag
+        {% endif %}
+      {% else %}
+        add to bag
+      {% endif %}
+    </span>
+    {% comment %}<span>{% if product.template_suffix == 'pre-order' %}{{ 'product.form.pre_order' | t }}{% else %}add to bag{% endif %}</span>{% endcomment %}
+
+    {%- if block.settings.show_price_in_button -%}
+      <span class="Button__SeparatorDot"></span>
+      <span>{{ product.selected_or_first_available_variant.price | money_without_trailing_zeros }}</span>
+    {%- endif -%}
+  {%- else -%}
+    {{- 'product.form.sold_out' | t -}}
+    
+  {%- endif -%}
+</button>
